@@ -4,7 +4,6 @@ from sqlalchemy.orm import relationship
 from config.db import engine, metadata
 import sqlalchemy
 
-
 customers = sqlalchemy.Table(
     "customers", 
     metadata, 

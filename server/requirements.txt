@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+pymysql
+databases
+aiomysql
+mysql
+mysql-connector-python
