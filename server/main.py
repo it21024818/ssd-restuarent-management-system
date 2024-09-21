@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from models import models
@@ -10,9 +10,11 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from cryptography.fernet import Fernet
 from jose import jwt
 import os
-from fastapi_limiter import FastAPILimiter
-from fastapi_limiter.depends import RateLimiter
 import bcrypt
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
 
 #giving access to the front end server
 app = FastAPI()
@@ -27,6 +29,10 @@ app.add_middleware(
 
 JWT_SECRET = os.getenv("JWT_SECRET")
 
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 @app.on_event("startup")
 async def startup():
     await database.connect()
@@ -38,8 +44,8 @@ async def shutdown():
 
 # Login route
 @app.post("/login")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    await RateLimiter("10/minute") 
+@limiter.limit("10/minute")
+async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends()):
     # Verify username and password
     query = models.User.select().where(models.User.c.username == form_data.username, models.User.c.password == form_data.password)
     user = await database.fetch_one(query)
@@ -50,14 +56,22 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     else:
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
-@app.post("/users/", response_model=schemas.UserCreate)
+@app.post("/users/")
 async def create_user(user: schemas.UserCreate):
+    # Check if the username already exists
+    query = models.User.select().where(models.User.c.username == user.username)
+    existing_user = await database.fetch_one(query)
+
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username already exists")
+
     # Hash the password
     hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
-  
+
     query = models.User.insert().values(username=user.username, email=user.email, password=hashed_password)
     last_record_id = await database.execute(query)
-    return {**user.dict(), "id": last_record_id}
+
+    return {"message": "User created successfully", "id": last_record_id}
 
 ###customers crud
 
