@@ -3,6 +3,29 @@ from sqlalchemy.orm import relationship
 #from config.db import engine, Base, metadata
 from config.db import engine, metadata
 import sqlalchemy
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
+# class User(Base):
+#     __tablename__ = "users"
+
+#     id = Column(Integer, primary_key=True)
+#     google_id = Column(String)
+#     facebook_id = Column(String)
+#     email = Column(String)
+#     password = Column(String)
+
+User = sqlalchemy.Table(
+    "users", 
+    metadata, 
+    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
+    sqlalchemy.Column("google_id", sqlalchemy.String(225)),
+    sqlalchemy.Column("facebook_id", sqlalchemy.String(225)),
+    sqlalchemy.Column("email", sqlalchemy.String(225)),
+    sqlalchemy.Column("username", sqlalchemy.String(225)),
+    sqlalchemy.Column("password", sqlalchemy.String(225)),
+)
 
 customers = sqlalchemy.Table(
     "customers", 

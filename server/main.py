@@ -6,9 +6,13 @@ from schemas import schemas
 #from config.db import SessionLocal, engine, database
 from config.db import engine, database
 from typing import List
-
-######################################################
-# models.Base.metadata.create_all(bind=engine)
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from cryptography.fernet import Fernet
+from jose import jwt
+import os
+from fastapi_limiter import FastAPILimiter
+from fastapi_limiter.depends import RateLimiter
+import bcrypt
 
 #giving access to the front end server
 app = FastAPI()
@@ -21,39 +25,7 @@ app.add_middleware(
      allow_headers=["*"],
 )
 
-# #app.include_router(user)
-
-# # Dependency
-# def get_db():
-#     db = SessionLocal()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
-
-
-# @app.post("/users/", response_model=schemas.User)
-# def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-#     db_user = routes.get_user_by_email(db, email=user.email)
-#     if db_user:
-#         raise HTTPException(status_code=400, detail="Email already registered")
-#     return routes.create_user(db=db, user=user)
-
-
-# @app.get("/users/", response_model=list[schemas.User])
-# def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-#     users = routes.get_users(db, skip=skip, limit=limit)
-#     return users
-
-
-# @app.get("/users/{user_id}", response_model=schemas.User)
-# def read_user(user_id: int, db: Session = Depends(get_db)):
-#     db_user = routes.get_user(db, user_id=user_id)
-#     if db_user is None:
-#         raise HTTPException(status_code=404, detail="User not found")
-#     return db_user
-
-##################################
+JWT_SECRET = os.getenv("JWT_SECRET")
 
 @app.on_event("startup")
 async def startup():
@@ -63,6 +35,29 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     await database.disconnect()
+
+# Login route
+@app.post("/login")
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    await RateLimiter("10/minute") 
+    # Verify username and password
+    query = models.User.select().where(models.User.c.username == form_data.username, models.User.c.password == form_data.password)
+    user = await database.fetch_one(query)
+    if user:
+        # Generate JWT token
+        token = jwt.encode({"sub": user.id}, key=JWT_SECRET, algorithm="HS256")
+        return {"access_token": token, "token_type": "bearer"}
+    else:
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+
+@app.post("/users/", response_model=schemas.UserCreate)
+async def create_user(user: schemas.UserCreate):
+    # Hash the password
+    hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
+  
+    query = models.User.insert().values(username=user.username, email=user.email, password=hashed_password)
+    last_record_id = await database.execute(query)
+    return {**user.dict(), "id": last_record_id}
 
 ###customers crud
 
