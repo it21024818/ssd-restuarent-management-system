@@ -55,7 +55,7 @@ export default {
     },
 
     async fetch(){
-      await this.$store.commit('users/storeData', (await this.$axios.get('http://localhost:8000/customers/')).data)
+      await this.$store.commit('users/storeData', (await this.$axios.get(`${process.env.SERVER_API}/customers/`)).data)
     },
     methods: {
         
@@ -75,10 +75,10 @@ export default {
         this.$store.commit("customer/storeCusPassword", customer.cusPassword);
       },
       async deleteItem(customer){
-        await this.$axios.delete('http://localhost:8000/customers/' + customer.cusId, customer);
+        await this.$axios.delete(`${process.env.SERVER_API}/customers/` + customer.cusId, customer);
         this.$store.commit(
           "users/storeData",
-          (await this.$axios.get("http://localhost:8000/customers/")).data
+          (await this.$axios.get(`${process.env.SERVER_API}/customers/`)).data
         );
       },
 

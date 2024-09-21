@@ -54,7 +54,7 @@ export default {
     async fetch() {
         this.$store.commit(
             'transactions/storeData',
-            (await this.$axios.get("http://localhost:8000/transac/")).data
+            (await this.$axios.get(`${process.env.SERVER_API}/transac/`)).data
         );
     },
     methods: {
@@ -76,10 +76,10 @@ export default {
         this.$store.commit("transaction/storeStAmount", transaction.stamount);
       },
       async deleteItem(transaction) {
-          await this.$axios.delete("http://localhost:8000/transac/" + transaction.stid, transaction);
+          await this.$axios.delete(`${process.env.SERVER_API}/transac/` + transaction.stid, transaction);
           this.$store.commit(
             'transactions/storeData', 
-            (await this.$axios.get("http://localhost:8000/transac/")).data);
+            (await this.$axios.get(`${process.env.SERVER_API}/transac/`)).data);
       }
   }
 };

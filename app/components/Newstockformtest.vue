@@ -132,12 +132,12 @@
     methods:{
       async confirmDEtails(stock){
         if(stock.itemCode){
-          await this.$axios.put("http://localhost:8000/stocks/" + stock.itemCode, stock)
+          await this.$axios.put(`${process.env.SERVER_API}/stocks/` + stock.itemCode, stock)
         }else{
-          await this.$axios.post("http://localhost:8000/stocks/", stock)
+          await this.$axios.post(`${process.env.SERVER_API}/stocks/`, stock)
         }
         await this.resetForm({eid:0, empemail:'', emppass:''})
-        await this.$store.commit("users/storeData", (await this.$axios.get('http://localhost:8000/stocks/')).data)
+        await this.$store.commit("users/storeData", (await this.$axios.get(`${process.env.SERVER_API}/stocks/`)).data)
       },
       resetForm(stock){
         this.$store.commit("stock/storeIcode", stock.itemCode);

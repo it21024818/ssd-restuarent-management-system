@@ -79,12 +79,12 @@
     methods:{
       async submitUser(expense){
         if(expense.eTransID){
-          await this.$axios.put("http://localhost:8000/expenses/" + expense.eTransID, expense)
+          await this.$axios.put(`${process.env.SERVER_API}/expenses/` + expense.eTransID, expense)
         }else{
-          await this.$axios.post("http://localhost:8000/expenses/", expense)
+          await this.$axios.post(`${process.env.SERVER_API}/expenses/`, expense)
         }
         await this.resetForm({eTransID:0, eDescription:'', eValue:0, eDate:'' })
-        await this.$store.commit("users/storeData", (await this.$axios.get('http://localhost:8000/expenses/')).data)
+        await this.$store.commit("users/storeData", (await this.$axios.get(`${process.env.SERVER_API}/expenses/`)).data)
       },
       resetForm(expense){
         this.$store.commit("expense/storeETransID", expense.eTransID);

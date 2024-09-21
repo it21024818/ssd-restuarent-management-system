@@ -42,7 +42,7 @@
 
     //retrieving data from the database
     async fetch(){
-      await this.$store.commit('users/storeData', (await this.$axios.get('http://localhost:8000/cards/')).data)
+      await this.$store.commit('users/storeData', (await this.$axios.get(`${process.env.SERVER_API}/cards/`)).data)
     },
     methods: {
       //retrieving card details to the form
@@ -57,10 +57,10 @@
       },
       //deleting cards on cards table
       async deleteItem(card){
-        await this.$axios.delete("http://localhost:8000/cards/" + card.cardId, card);
+        await this.$axios.delete(`${process.env.SERVER_API}/cards/` + card.cardId, card);
         this.$store.commit(
           "users/storeData",
-          (await this.$axios.get("http://localhost:8000/cards/")).data
+          (await this.$axios.get(`${process.env.SERVER_API}/cards/`)).data
         );
       },
 

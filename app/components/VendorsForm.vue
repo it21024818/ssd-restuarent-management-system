@@ -106,12 +106,12 @@ export default {
   methods:{
     async submitVendor(vendor){
       if (vendor.vid) {
-        await this.$axios.put("http://localhost:8000/vendors/" + vendor.vid, vendor);
+        await this.$axios.put(`${process.env.SERVER_API}/vendors/` + vendor.vid, vendor);
       } else {
-        await this.$axios.post("http://localhost:8000/vendors/", vendor);
+        await this.$axios.post(`${process.env.SERVER_API}/vendors/`, vendor);
       }
       await this.resetForm({vid:0, vname:'', vcontact:'', vtype:'', vemail:'', vzip:'', vaddress:''});
-      await this.$store.commit("users/storeData", (await this.$axios.get('http://localhost:8000/vendors/')).data);
+      await this.$store.commit("users/storeData", (await this.$axios.get(`${process.env.SERVER_API}/vendors/`)).data);
     },
     resetForm(vendor){
       this.$store.commit("vendor/storeVId", vendor.vid);

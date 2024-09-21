@@ -37,7 +37,7 @@ export default {
     },
 
     async fetch(){
-      await this.$store.commit('users/storeData', (await this.$axios.get('http://localhost:8000/cards/')).data)
+      await this.$store.commit('users/storeData', (await this.$axios.get(`${process.env.SERVER_API}/cards/`)).data)
     },
     methods: {
       editItem(request){
@@ -49,10 +49,10 @@ export default {
         
       },
       async deleteItem(reqid){
-        await this.$axios.delete('http://localhost:8000/cards/{cardId}' + reqid);
+        await this.$axios.delete(`${process.env.SERVER_API}/cards/{cardId}` + reqid);
         this.$store.commit(
           "users/storeData",
-          (await this.$axios.get("http://localhost:8000/cards/")).data
+          (await this.$axios.get(`${process.env.SERVER_API}/cards/`)).data
         );
       },
 

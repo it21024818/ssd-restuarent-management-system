@@ -52,7 +52,7 @@ export default {
     },
 
     async fetch() {
-        await this.$store.commit('users/storeData', (await this.$axios.get('http://localhost:8000/schedules/')).data)
+        await this.$store.commit('users/storeData', (await this.$axios.get(`${process.env.SERVER_API}/schedules/`)).data)
     },
     methods: {
         //export the invoice as a pdf
@@ -73,10 +73,10 @@ export default {
             this.$store.commit("event/storeEventDetails", event.scheduleOrderdetails);
         },
         async deleteItem(event) {
-            await this.$axios.delete('http://localhost:8000/schedules/' + event.scheduleId, event);
+            await this.$axios.delete(`${process.env.SERVER_API}/schedules/` + event.scheduleId, event);
             this.$store.commit(
                 "users/storeData",
-                (await this.$axios.get("http://localhost:8000/schedules/")).data
+                (await this.$axios.get(`${process.env.SERVER_API}/schedules/`)).data
             );
         },
 

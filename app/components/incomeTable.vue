@@ -53,7 +53,7 @@
       },
   
       async fetch(){
-        await this.$store.commit('users/storeData', (await this.$axios.get('http://localhost:8000/incomes/')).data)
+        await this.$store.commit('users/storeData', (await this.$axios.get(`${process.env.SERVER_API}/incomes/`)).data)
       },
       methods: {
         editItem(income){
@@ -63,10 +63,10 @@
           this.$store.commit("income/storeIDate", income.iDate);
         },
         async deleteItem(income){
-          await this.$axios.delete("http://localhost:8000/incomes/" + income.iTransID, income);
+          await this.$axios.delete(`${process.env.SERVER_API}/incomes/` + income.iTransID, income);
           this.$store.commit(
             "users/storeData",
-            (await this.$axios.get("http://localhost:8000/incomes/")).data
+            (await this.$axios.get(`${process.env.SERVER_API}/incomes/`)).data
           );
         },
   

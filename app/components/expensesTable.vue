@@ -53,7 +53,7 @@
       },
   
       async fetch(){
-        await this.$store.commit('users/storeData', (await this.$axios.get('http://localhost:8000/expenses/')).data)
+        await this.$store.commit('users/storeData', (await this.$axios.get(`${process.env.SERVER_API}/expenses/`)).data)
       },
       methods: {
         editItem(expense){
@@ -63,10 +63,10 @@
           this.$store.commit("expense/storeEDate", expense.eDate);
         },
         async deleteItem(expense){
-          await this.$axios.delete("http://localhost:8000/expenses/" + expense.eTransID, expense);
+          await this.$axios.delete(`${process.env.SERVER_API}/expenses/` + expense.eTransID, expense);
           this.$store.commit(
             "users/storeData",
-            (await this.$axios.get("http://localhost:8000/expenses/")).data
+            (await this.$axios.get(`${process.env.SERVER_API}/expenses/`)).data
           );
         },
   

@@ -137,7 +137,7 @@ export default {
     },
 
     async fetch(){
-      await this.$store.commit('users/storeData', (await this.$axios.get('http://localhost:8000/employee/{empemail},{emppass}')).data)
+      await this.$store.commit('users/storeData', (await this.$axios.get(`${process.env.SERVER_API}/employee/{empemail},{emppass}`)).data)
     },
 
     methods: {
@@ -152,13 +152,6 @@ export default {
         this.$store.commit("employee/storeSalary", employee.salary);
         this.$store.commit("employee/storeEmpPass", employee.emppass);
         this.$store.commit("employee/storeRole", employee.role);
-      },
-      async deleteItem(employee){
-        await this.$axios.delete('http://localhost:8000/employee/' + employee.eid, employee);
-        this.$store.commit(
-          "users/storeData",
-          (await this.$axios.get("http://localhost:8000/employee/")).data
-        );
       },
 
     },

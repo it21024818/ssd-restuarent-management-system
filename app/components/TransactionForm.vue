@@ -86,12 +86,12 @@ export default {
   methods:{
     async submitTransac(transaction){
       if (transaction.stid) {
-        await this.$axios.put("http://localhost:8000/transac/" + transaction.stid, transaction);
+        await this.$axios.put(`${process.env.SERVER_API}/transac/` + transaction.stid, transaction);
       } else {
-        await this.$axios.post("http://localhost:8000/transac/", transaction);
+        await this.$axios.post(`${process.env.SERVER_API}/transac/`, transaction);
       }
       await this.resetForm({stid:0, stcname:'', stdate:'', stitem:'', stquantity:'', stamount:''});
-      await this.$store.commit("transactions/storeData", (await this.$axios.get('http://localhost:8000/transac/')).data);
+      await this.$store.commit("transactions/storeData", (await this.$axios.get(`${process.env.SERVER_API}/transac/`)).data);
     },
     resetForm(transaction){
       this.$store.commit("transaction/storeStId",transaction.stid);

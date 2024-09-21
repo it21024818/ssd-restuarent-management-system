@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from models import models
 from schemas import schemas
-#from config.db import SessionLocal, engine, database
 from config.db import engine, database
 from typing import List
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -28,6 +27,10 @@ app.add_middleware(
 )
 
 JWT_SECRET = os.getenv("JWT_SECRET")
+REFRESH_TOKEN_SECRET = os.getenv("REFRESH_TOKEN_SECRET")
+
+# In-memory cache to store issued tokens
+token_cache = {}
 
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
@@ -50,11 +53,46 @@ async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends
     query = models.User.select().where(models.User.c.username == form_data.username, models.User.c.password == form_data.password)
     user = await database.fetch_one(query)
     if user:
-        # Generate JWT token
-        token = jwt.encode({"sub": user.id}, key=JWT_SECRET, algorithm="HS256")
-        return {"access_token": token, "token_type": "bearer"}
+        # Generate access token and refresh token
+        access_token = jwt.encode({"sub": user.id, "exp": 900}, key=JWT_SECRET, algorithm="HS256")
+        refresh_token = jwt.encode({"sub": user.id, "exp": 3600}, key=REFRESH_TOKEN_SECRET, algorithm="HS256")
+        # Store tokens in cache
+        token_cache[access_token] = refresh_token
+        return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
     else:
         raise HTTPException(status_code=401, detail="Invalid username or password")
+
+# Logout route
+@app.post("/logout")
+async def logout(request: Request, access_token: OAuth2PasswordBearer = Depends()):
+    # Check if token is valid
+    if access_token not in token_cache:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    # Revoke token
+    del token_cache[access_token]
+    return {"message": "Logged out successfully"}
+
+# Refresh token route
+@app.post("/refresh-token")
+async def refresh_token(request: Request, refresh_token: OAuth2PasswordBearer = Depends()):
+    # Check if refresh token is valid
+    for access_token, stored_refresh_token in token_cache.items():
+        if stored_refresh_token == refresh_token:
+            # Generate new access token
+            user_id = jwt.decode(refresh_token, key=REFRESH_TOKEN_SECRET, algorithms=["HS256"])["sub"]
+            new_access_token = jwt.encode({"sub": user_id, "exp": 900}, key=JWT_SECRET, algorithm="HS256")
+            # Update token cache
+            token_cache[new_access_token] = refresh_token
+            return {"access_token": new_access_token, "token_type": "bearer"}
+    raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+# Protected route
+@app.get("/protected")
+async def protected(request: Request, access_token: OAuth2PasswordBearer = Depends()):
+    # Check if token is valid
+    if access_token not in token_cache:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return {"message": "Hello, protected world!"}
 
 @app.post("/users/")
 async def create_user(user: schemas.UserCreate):
@@ -192,7 +230,7 @@ async def delete_card(scheduleId: int):
     return {"scheduleId": last_record_id}
 
 
-#########aludin
+#########employee
 
 @app.get("/employee/{empemail},{emppass}", response_model=List[schemas.Employee])
 async def read_notes( empemail: str, emppass: str):
@@ -234,7 +272,7 @@ async def create_user(request: schemas.Request):
     last_record_id = await database.execute(query)
     return {**request.dict(), "reqid": last_record_id}
 
-#############ERa
+#############vendors
 @app.get("/vendors/", response_model=List[schemas.Vendor])
 async def read_notes():
     query = models.vendors.select()
@@ -283,7 +321,7 @@ async def delete_strans(stid: int):
     last_record_id = await database.execute(query)
     return {"stid": last_record_id}
 
-#########ashani
+#########stocks
 @app.get("/stocks/", response_model=List[schemas.Stock])
 async def read_notes():
     query = models.stocks.select()
@@ -309,7 +347,7 @@ async def delete_stock(itemCode: int):
     return {"itemCode": last_record_id}
 
 
-###########sasindu
+###########incomes
 @app.get("/incomes/", response_model=List[schemas.Income])
 async def read_incomes():
     query = models.incomes.select()

@@ -89,12 +89,12 @@
     methods:{
       async submitUser(request){
         if(request.reqid){
-          await this.$axios.post("http://localhost:8000/request/" + request.reqid, request)
+          await this.$axios.post(`${process.env.SERVER_API}/request/` + request.reqid, request)
         }else{
-          await this.$axios.post("http://localhost:8000/request/", request)
+          await this.$axios.post(`${process.env.SERVER_API}/request/`, request)
         }
         await this.resetForm({reqid:0, ereqdate:'', reqemail:'',etitle:'' , emessage:''})
-        await this.$axios.commit("users/storeData", (await this.$axios.get('http://localhost:8000/request/')).data)
+        await this.$axios.commit("users/storeData", (await this.$axios.get(`${process.env.SERVER_API}/request/`)).data)
       },
       resetForm(request){
         this.$store.commit("request/storeReqId", request.reqid);

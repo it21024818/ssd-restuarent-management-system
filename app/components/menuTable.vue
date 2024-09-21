@@ -52,7 +52,7 @@ import html2pdf from "html2pdf.js";
        }
      },
      async fetch(){
-       await this.$store.commit('users/storeData', (await this.$axios.get('http://localhost:8000/menu/')).data)
+       await this.$store.commit('users/storeData', (await this.$axios.get(`${process.env.SERVER_API}/menu/`)).data)
      },
      methods: {
       //export the invoice as a pdf
@@ -70,10 +70,10 @@ import html2pdf from "html2pdf.js";
          this.$store.commit("menu/storeMenuItemPhotoLink", menu.mItemPhotoLink);
        },
        async deleteItem(menu){
-         await this.$axios.delete('http://localhost:8000/menu/' + menu.mItemID, menu);
+         await this.$axios.delete(`${process.env.SERVER_API}/menu/` + menu.mItemID, menu);
          this.$store.commit(
            "users/storeData",
-           (await this.$axios.get("http://localhost:8000/menu/")).data
+           (await this.$axios.get(`${process.env.SERVER_API}/menu/`)).data
          );
        },
      },

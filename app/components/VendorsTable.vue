@@ -53,9 +53,10 @@ export default {
         }
     },
     async fetch() {
+      console.log(process.env.SERVER_API);
         this.$store.commit(
             'users/storeData',
-            (await this.$axios.get("http://localhost:8000/vendors/")).data
+            (await this.$axios.get(`${process.env.SERVER_API}/vendors/`)).data
         );
     },
     methods: {
@@ -78,10 +79,10 @@ export default {
           this.$store.commit("vendor/storeVAddress", vendor.vaddress);
         },
         async deleteItem(vendor) {
-            await this.$axios.delete("http://localhost:8000/vendors/" + vendor.vid, vendor);
+            await this.$axios.delete(`${process.env.SERVER_API}/vendors/` + vendor.vid, vendor);
             this.$store.commit(
               'users/storeData', 
-              (await this.$axios.get("http://localhost:8000/vendors/")).data);
+              (await this.$axios.get(`${process.env.SERVER_API}/vendors/`)).data);
         },
 
 

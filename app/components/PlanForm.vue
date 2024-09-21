@@ -133,12 +133,12 @@
     methods:{
       async saveEvent(event){
         if (event.scheduleId){
-            await this.$axios.put("http://localhost:8000/schedules/" + event.scheduleId, event)
+            await this.$axios.put(`${process.env.SERVER_API}/schedules/` + event.scheduleId, event)
         }else{
-            await this.$axios.post("http://localhost:8000/schedules/", event)
+            await this.$axios.post(`${process.env.SERVER_API}/schedules/`, event)
         }
         await this.resetForm({ scheduleId: 0, scheduleName: '', scheduleMobilenumber:''})
-            await this.$store.commit("users/storeData", (await this.$axios.get('http://localhost:8000/schedules/')).data)
+            await this.$store.commit("users/storeData", (await this.$axios.get(`${process.env.SERVER_API}/schedules/`)).data)
       },
       resetForm(event){
           this.$store.commit("event/storescheduleId", event.scheduleId);

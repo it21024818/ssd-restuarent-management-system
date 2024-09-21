@@ -96,12 +96,12 @@
     methods:{
       async submitUser(user){
         if(user.id){
-          await this.$axios.post("http://localhost:8000/users/" + user.id, user)
+          await this.$axios.post(`${process.env.SERVER_API}/users/` + user.id, user)
         }else{
-          await this.$axios.post("http://localhost:8000/users/", user)
+          await this.$axios.post(`${process.env.SERVER_API}/users/`, user)
         }
         await this.resetForm({id:0, email:'', password:''})
-        await this.$axios.commit("users/storeData", (await this.$axios.get('http://localhost:8000/users/')).data)
+        await this.$axios.commit("users/storeData", (await this.$axios.get(`${process.env.SERVER_API}/users/`)).data)
       },
       resetForm(user){
         this.$store.commit("user/storeId", user.id);

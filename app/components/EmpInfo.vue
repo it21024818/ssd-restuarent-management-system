@@ -59,7 +59,7 @@ export default {
     },
 
     async fetch(){
-      await this.$store.commit('users/storeData', (await this.$axios.get('http://localhost:8000/employee/')).data)
+      await this.$store.commit('users/storeData', (await this.$axios.get(`${process.env.SERVER_API}/employee/`)).data)
     },
     methods: {
         
@@ -84,10 +84,10 @@ export default {
         this.$store.commit("employee/storeRole", employee.role);
       },
       async deleteItem(employee){
-        await this.$axios.delete('http://localhost:8000/employee/' + employee.eid, employee);
+        await this.$axios.delete(`${process.env.SERVER_API}/employee/` + employee.eid, employee);
         this.$store.commit(
           "users/storeData",
-          (await this.$axios.get("http://localhost:8000/employee/")).data
+          (await this.$axios.get(`${process.env.SERVER_API}/employee/`)).data
         );
       },
 

@@ -58,7 +58,7 @@
 
     //retrieving data from the database
     async fetch(){
-      await this.$store.commit('users/storeData', (await this.$axios.get('http://localhost:8000/orders/')).data)
+      await this.$store.commit('users/storeData', (await this.$axios.get(`${process.env.SERVER_API}/orders/`)).data)
     },
     methods: {
       //updating data
@@ -74,10 +74,10 @@
       },
       //deleting orders
       async deleteItem(order){
-        await this.$axios.delete('http://localhost:8000/orders/' + order.orderId, order);
+        await this.$axios.delete(`${process.env.SERVER_API}/orders/` + order.orderId, order);
         this.$store.commit(
           "users/storeData",
-          (await this.$axios.get("http://localhost:8000/orders/")).data
+          (await this.$axios.get(`${process.env.SERVER_API}/orders/`)).data
         );
       },
 

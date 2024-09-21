@@ -204,12 +204,12 @@
       async submitCard(card){
         if(card.cardId){
           //updating cards on cards table
-          await this.$axios.put("http://localhost:8000/cards/" + card.cardId, card);
+          await this.$axios.put(`${process.env.SERVER_API}/cards/` + card.cardId, card);
         }else{
-          await this.$axios.post("http://localhost:8000/cards/", card);
+          await this.$axios.post(`${process.env.SERVER_API}/cards/`, card);
         }
         await this.resetForm({cardId:0, cardtype:'', cardnum:'', exdate:'', cvv:'', cardname:'', billaddress:''});
-        await this.$store.commit("users/storeData", (await this.$axios.get('http://localhost:8000/cards/')).data);
+        await this.$store.commit("users/storeData", (await this.$axios.get(`${process.env.SERVER_API}/cards/`)).data);
       },
       resetForm(card){
         this.$store.commit("card/storeId", card.cardId);

@@ -65,12 +65,12 @@
     methods:{
       async submitUser(income){
         if(income.iTransID){
-          await this.$axios.put("http://localhost:8000/incomes/" + income.iTransID, income)
+          await this.$axios.put(`${process.env.SERVER_API}/incomes/` + income.iTransID, income)
         }else{
-          await this.$axios.post("http://localhost:8000/incomes/", income)
+          await this.$axios.post(`${process.env.SERVER_API}/incomes/`, income)
         }
         await this.resetForm({iTransID:0, iDescription:'', iValue:0, iDate:'' })
-        await this.$store.commit("users/storeData", (await this.$axios.get('http://localhost:8000/incomes/')).data)
+        await this.$store.commit("users/storeData", (await this.$axios.get(`${process.env.SERVER_API}/incomes/`)).data)
       },
       resetForm(income){
         this.$store.commit("income/storeITransID", income.iTransID);

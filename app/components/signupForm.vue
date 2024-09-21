@@ -109,12 +109,12 @@ export default {
     methods:{
       async submitUser(customer){
         if(customer.cusId){
-          await this.$axios.put("http://localhost:8000/customers/" + customer.cusId, customer)
+          await this.$axios.put(`${process.env.SERVER_API}/customers/` + customer.cusId, customer)
         }else{
-          await this.$axios.post("http://localhost:8000/customers/", customer)
+          await this.$axios.post(`${process.env.SERVER_API}/customers/`, customer)
         }
         await this.resetForm({cusId:0, cusName:'', cusEmail:'', cusNum:'', cusPassword:''})
-        await this.$store.commit("users/storeData", (await this.$axios.get('http://localhost:8000/customers/')).data)
+        await this.$store.commit("users/storeData", (await this.$axios.get(`${process.env.SERVER_API}/customers/`)).data)
       },
       resetForm(customer){
         this.$store.commit("customer/storeCusId", customer.cusId);

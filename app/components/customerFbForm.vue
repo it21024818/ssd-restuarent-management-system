@@ -98,12 +98,12 @@ export default {
     methods:{
       async submitUser(feedback){
         if(feedback.feedbackId){
-          await this.$axios.put("http://localhost:8000/feedbacks/" + feedback.feedbackId, feedback)
+          await this.$axios.put(`${process.env.SERVER_API}/feedbacks/` + feedback.feedbackId, feedback)
         }else{
-          await this.$axios.post("http://localhost:8000/feedbacks/", feedback)
+          await this.$axios.post(`${process.env.SERVER_API}/feedbacks/`, feedback)
         }
         await this.resetForm({feedbackId:0, fbCustName:'', fbCustEmail:'', fbDesc:'' })
-        await this.$store.commit("users/storeData", (await this.$axios.get('http://localhost:8000/feedbacks/')).data)
+        await this.$store.commit("users/storeData", (await this.$axios.get(`${process.env.SERVER_API}/feedbacks/`)).data)
       },
       resetForm(feedback){
         this.$store.commit("feedback/storeETransID", feedback.feedbackId);

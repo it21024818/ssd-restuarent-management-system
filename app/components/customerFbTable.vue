@@ -37,7 +37,7 @@
       },
   
       async fetch(){
-        await this.$store.commit('users/storeData', (await this.$axios.get('http://localhost:8000/feedbacks/')).data)
+        await this.$store.commit('users/storeData', (await this.$axios.get(`${process.env.SERVER_API}/feedbacks/`)).data)
       },
       methods: {
         editItem(feedback){
@@ -47,10 +47,10 @@
           this.$store.commit("feedback/feedback", feedback.feedback);
         },
         async deleteItem(feedback){
-          await this.$axios.delete("http://localhost:8000/feedbacks/" + cusorder.custOrderID, feedback);
+          await this.$axios.delete(`${process.env.SERVER_API}/feedbacks/` + cusorder.custOrderID, feedback);
           this.$store.commit(
             "users/storeData",
-            (await this.$axios.get("http://localhost:8000/feedbacks/")).data
+            (await this.$axios.get(`${process.env.SERVER_API}/feedbacks/`)).data
           );
         },
 

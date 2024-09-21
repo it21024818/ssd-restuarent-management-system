@@ -33,7 +33,7 @@
     },
 
     async fetch(){
-      await this.$store.commit('users/storeData', (await this.$axios.get('http://localhost:8000/users/')).data)
+      await this.$store.commit('users/storeData', (await this.$axios.get(`${process.env.SERVER_API}/users/`)).data)
     },
     methods: {
       editItem(user){
@@ -42,10 +42,10 @@
         this.$store.commit("user/storePassword", user.password);
       },
       async deleteItem(id){
-        await this.$axios.delete('http://localhost:8000/users/' + id);
+        await this.$axios.delete(`${process.env.SERVER_API}/users/` + id);
         this.$store.commit(
           "users/storeData",
-          (await this.$axios.get("http://localhost:8000/users/")).data
+          (await this.$axios.get(`${process.env.SERVER_API}/users/`)).data
         );
       },
 

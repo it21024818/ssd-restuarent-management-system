@@ -186,12 +186,12 @@
     methods:{
       async submitUser(employee){
         if(employee.eid){
-          await this.$axios.put("http://localhost:8000/employee/" + employee.eid, employee)
+          await this.$axios.put(`${process.env.SERVER_API}/employee/` + employee.eid, employee)
         }else{
-          await this.$axios.post("http://localhost:8000/employee/", employee)
+          await this.$axios.post(`${process.env.SERVER_API}/employee/`, employee)
         }
         await this.resetForm({eid:0, empemail:'', emppass:''})
-        await this.$store.commit("users/storeData", (await this.$axios.get('http://localhost:8000/employee/')).data)
+        await this.$store.commit("users/storeData", (await this.$axios.get(`${process.env.SERVER_API}/employee/`)).data)
       },
       resetForm(employee){
         this.$store.commit("employee/storeId", employee.eid);
