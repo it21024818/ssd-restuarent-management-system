@@ -1,53 +1,46 @@
-import colors from 'vuetify/es5/util/colors'
+import colors from "vuetify/es5/util/colors";
 
 export default {
-    buildModules: [
-        "@nuxtjs/vuetify"
-    ],
-    modules: [
-        "@nuxtjs/axios",
-        // https://go.nuxtjs.dev/pwa
-        // '@nuxtjs/pwa',
-       // https://go.nuxtjs.dev/content
-        '@nuxt/content',
-        "vue-sweetalert2/nuxt/no-css",
-        "nuxt-webfontloader",
-        '@nuxtjs/dotenv',
-    ],
-    components: true,
+  buildModules: ["@nuxtjs/vuetify"],
+  modules: [
+    "@nuxtjs/axios",
+    // https://go.nuxtjs.dev/pwa
+    // '@nuxtjs/pwa',
+    // https://go.nuxtjs.dev/content
+    "@nuxt/content",
+    "vue-sweetalert2/nuxt/no-css",
+    "nuxt-webfontloader",
+    "@nuxtjs/dotenv",
+  ],
+  components: true,
 
-    router: {
-      middleware: ['auth']
-    },
-    
-    // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
+  router: {
+    middleware: ["auth"],
+  },
+
+  // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
   ssr: true,
 
   // Target: https://go.nuxtjs.dev/config-target
-  target: 'static',
+  target: "static",
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'Cafe Green',
+    title: "Cafe Green",
     meta: [
-      { charset: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: 'eCommerce Website' },
-      { name: 'format-detection', content: 'telephone=no' }
+      { charset: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { hid: "description", name: "description", content: "eCommerce Website" },
+      { name: "format-detection", content: "telephone=no" },
     ],
-    link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/logo.jpg' }
-    ]
+    link: [{ rel: "icon", type: "image/x-icon", href: "/logo.jpg" }],
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: ["@sweetalert2/theme-material-ui", 
-        "~/assets/main.css",
-  ],  
+  css: ["@sweetalert2/theme-material-ui", "~/assets/main.css"],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: ["~/plugins/cart.js"
-  ],
+  plugins: ["~/plugins/cart.js"],
 
   webfontloader: {
     google: {
@@ -56,14 +49,14 @@ export default {
   },
 
   //PWA module configuration: https://go.nuxtjs.dev/pwa
-//   pwa: {
-//     manifest: {
-//       lang: 'en'
-//     }
-//   },
+  //   pwa: {
+  //     manifest: {
+  //       lang: 'en'
+  //     }
+  //   },
 
   // Content module configuration: https://go.nuxtjs.dev/config-content
-content: {},
+  content: {},
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
@@ -105,7 +98,14 @@ content: {},
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
-  build: {
-  }
+  build: {},
 
-}
+  render: {
+    http: {
+      headers: {
+        'Content-Security-Policy': "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; object-src 'none'",
+        'X-Content-Type-Options': 'nosniff',
+      },
+    },
+  },
+};

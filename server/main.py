@@ -26,6 +26,18 @@ app.add_middleware(
      allow_headers=["*"],
 )
 
+@app.middleware("http")
+async def add_x_frame_options_header(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Frame-Options"] = "DENY"
+    return response
+
+@app.middleware("http")
+async def remove_date_header(request, call_next):
+    response = await call_next(request)
+    response.headers.pop("Date", None)
+    return response
+    
 JWT_SECRET = os.getenv("JWT_SECRET")
 REFRESH_TOKEN_SECRET = os.getenv("REFRESH_TOKEN_SECRET")
 
