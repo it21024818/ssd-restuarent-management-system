@@ -93,6 +93,7 @@ export default {
           });
           if (response.status === 200) {
             // Handle successful login
+            this.$store.commit('setAuthenticated', true)
             localStorage.setItem('token', response.data.access_token);
             this.$store.commit("user/storeId", response.data.id);
             // Redirect to the dashboard or any other page

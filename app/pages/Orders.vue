@@ -33,6 +33,7 @@ import dashboard from '../components/dashboard.vue'
 // import HelloWorld from '@/components/HelloWorld.vue'
 
 export default {
+  middleware: ['auth'],
   components: { dashboard },
   
 }

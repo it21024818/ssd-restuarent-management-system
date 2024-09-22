@@ -16,6 +16,10 @@ export default {
     ],
     components: true,
 
+    router: {
+      middleware: ['auth']
+    },
+    
     // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
   ssr: true,
 
