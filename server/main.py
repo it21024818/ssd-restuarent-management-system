@@ -50,15 +50,19 @@ async def shutdown():
 @limiter.limit("10/minute")
 async def login(request: Request, form_data: schemas.UserLogin):
     # Verify username and password
-    query = models.User.select().where(models.User.c.username == form_data.username, models.User.c.password == form_data.password)
+    query = models.User.select().where(models.User.c.username == form_data.username)
     user = await database.fetch_one(query)
     if user:
-        # Generate access token and refresh token
-        access_token = jwt.encode({"sub": user.id, "exp": 900}, key=JWT_SECRET, algorithm="HS256")
-        refresh_token = jwt.encode({"sub": user.id, "exp": 3600}, key=REFRESH_TOKEN_SECRET, algorithm="HS256")
-        # Store tokens in cache
-        token_cache[access_token] = refresh_token
-        return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+        # Verify password using bcrypt
+        if bcrypt.checkpw(form_data.password.encode('utf-8'), user.password.encode('utf-8')):
+            # Generate access token and refresh token
+            access_token = jwt.encode({"sub": user.id, "exp": 900}, key=JWT_SECRET, algorithm="HS256")
+            refresh_token = jwt.encode({"sub": user.id, "exp": 3600}, key=REFRESH_TOKEN_SECRET, algorithm="HS256")
+            # Store tokens in cache
+            token_cache[access_token] = user.id
+            return {"access_token": access_token, "refresh_token": refresh_token}
+        else:
+            raise HTTPException(status_code=401, detail="Invalid username or password")
     else:
         raise HTTPException(status_code=401, detail="Invalid username or password")
 

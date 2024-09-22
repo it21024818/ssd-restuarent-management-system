@@ -18,9 +18,17 @@
                 </div>
                 <SocialButtons class="formstyle"/>
                 <div class="formdiv">
-                    <input type="text" v-model="username" placeholder="Username" class="field" id="field"><br><br>
-                    <input type="password" v-model="password" placeholder="Password" class="field"><br>
-                    <button type="submit" class="formbtn">Sign In</button><br>
+                  <input type="text" v-model="username" placeholder="Username" class="field" id="field" 
+                        :class="{ 'error': !isValidUsername }" @blur="validateUsername">
+                  <div v-if="!isValidUsername" class="error-message">Invalid username. Please enter a valid username.</div>
+                  <br><br>
+                  <input type="password" v-model="password" placeholder="Password" class="field" 
+                        :class="{ 'error': !isValidPassword }" @blur="validatePassword">
+                  <div v-if="!isValidPassword" class="error-message">Invalid password. Please enter a valid password (min 8 characters).</div>
+                  <br>
+                  <button type="submit" class="formbtn" :disabled="!isValidForm">Sign In</button>
+                  <br>
+                  <div v-if="loginError" class="error-message">{{ loginError }}</div>
                 </div>
             </v-form >
         </div>
@@ -40,8 +48,21 @@ export default {
     LogoPic, SocialButtons
   },
 
+  data() {
+    return {
+      username: '',
+      password: '',
+      isValidUsername: true,
+      isValidPassword: true,
+      loginError: null
+    }
+  },
+
   computed:{
 
+    isValidForm() {
+      return this.isValidUsername && this.isValidPassword
+    },
     users(){
         return this.$store.state.users.data
     },
@@ -81,34 +102,41 @@ export default {
           this.$store.commit("user/storeUsername", value)
         }
       }
+  },
 
+  methods: {
+
+    validateUsername() {
+      this.isValidUsername = /^[a-zA-Z0-9]+$/.test(this.username)
     },
-
-    methods: {
-      async login() {
-        try {
-          const response = await this.$axios.post(`${process.env.SERVER_API}/login`, {
-            username: this.username,
-            password: this.password
-          });
-          if (response.status === 200) {
-            // Handle successful login
-            this.$store.commit('setAuthenticated', true)
-            localStorage.setItem('token', response.data.access_token);
-            this.$store.commit("user/storeId", response.data.id);
-            // Redirect to the dashboard or any other page
-            this.$router.push('/orders');
-          } else {
-            // Handle login error
-            console.error(response.data);
-          }
-        } catch (error) {
-          // Handle network error
-          console.error(error);
+    validatePassword() {
+      this.isValidPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(this.password)
+    },
+    async login() {
+      try {
+        const response = await this.$axios.post(`${process.env.SERVER_API}/login`, {
+          username: this.username,
+          password: this.password
+        });
+        if (response.status === 200) {
+          // Handle successful login
+          this.$store.commit('setAuthenticated', true)
+          localStorage.setItem('token', response.data.access_token);
+          this.$store.commit("user/storeId", response.data.id);
+          // Redirect to the dashboard or any other page
+          this.$router.push('/orders');
+        } else {
+          // Handle login error
+          console.error(response.data);
+          this.loginError = 'Invalid username or password.'
         }
-      },
-
+      } catch (error) {
+        // Handle network error
+        console.error(error);
+        this.loginError = 'Network error. Please try again.'
+      }
     },
+  },
 }
 </script>
 
@@ -195,6 +223,15 @@ a{
     width: 100vh;
     height: 100vh;
     object-fit: cover;
+}
+.error {
+  border: 1px solid red;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-bottom: 10px;
 }
 /* cyrillic */
 @font-face {
