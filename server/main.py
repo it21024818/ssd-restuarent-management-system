@@ -48,7 +48,7 @@ async def shutdown():
 # Login route
 @app.post("/login")
 @limiter.limit("10/minute")
-async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends()):
+async def login(request: Request, form_data: schemas.UserLogin):
     # Verify username and password
     query = models.User.select().where(models.User.c.username == form_data.username, models.User.c.password == form_data.password)
     user = await database.fetch_one(query)
@@ -64,13 +64,18 @@ async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends
 
 # Logout route
 @app.post("/logout")
-async def logout(request: Request, access_token: OAuth2PasswordBearer = Depends()):
-    # Check if token is valid
-    if access_token not in token_cache:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    # Revoke token
-    del token_cache[access_token]
-    return {"message": "Logged out successfully"}
+async def logout(request: Request):
+    # Get the token from the Authorization header
+    token = request.headers.get('Authorization')
+    if token:
+        # Remove the 'Bearer ' prefix
+        token = token.replace('Bearer ', '')
+        # Check if token is valid
+        if token in token_cache:
+            # Revoke token
+            del token_cache[token]
+            return {"message": "Logged out successfully"}
+    raise HTTPException(status_code=401, detail="Invalid token")
 
 # Refresh token route
 @app.post("/refresh-token")

@@ -11,18 +11,17 @@
                     <a href=""></a>
                 </div>
             </div>
-            <v-form  class="loginForm" >
+            <v-form @submit.prevent="login" class="loginForm" >
                 <div class="div1">
                     <h1>Welcome Back</h1>
                     <h5 id="subtitle">Login into your account</h5>
                 </div>
                 <SocialButtons class="formstyle"/>
                 <div class="formdiv">
-                    <input type="text" v-model="empemail" placeholder="Email" class="field" id="field"><br><br>
-                    <input type="password" v-model="emppass" placeholder="Password" class="field"><br>
+                    <input type="text" v-model="username" placeholder="Username" class="field" id="field"><br><br>
+                    <input type="password" v-model="password" placeholder="Password" class="field"><br>
+                    <button type="submit" class="formbtn">Sign In</button><br>
                 </div>
-                <router-link to="/CustomerDashboard"><button @click="editItem()" class="formbtn">Login</button><br></router-link>
-                <router-link to="/orders"><button class="formbtn" id="formbtn">Continue as a guest</button></router-link>
             </v-form >
         </div>
         <div class="RightContainer">
@@ -47,111 +46,65 @@ export default {
         return this.$store.state.users.data
     },
 
-      eid:{
+      id:{
         get(){
-          return this.$store.state.employee.eid
+          return this.$store.state.user.id
         },
         set(value){
-          this.$store.commit("employee/storeEmpId", value)
+          this.$store.commit("user/storeId", value)
         }
       },
 
-      efirstname:{
+      email:{
         get(){
-          return this.$store.state.employee.efirstname
+          return this.$store.state.user.email
         },
         set(value){
-          this.$store.commit("employee/storeEmpFName", value)
+          this.$store.commit("user/storeEmail", value)
         }
       },
 
-      elastname:{
+      password:{
         get(){
-          return this.$store.state.employee.elastname
+          return this.$store.state.user.password
         },
         set(value){
-          this.$store.commit("employee/storeEmpLName", value)
+          this.$store.commit("user/storePassword", value)
         }
       },
 
-      empemail:{
+      username:{
         get(){
-          return this.$store.state.employee.empemail
+          return this.$store.state.user.username
         },
         set(value){
-          this.$store.commit("employee/storeEmpMail", value)
+          this.$store.commit("user/storeUsername", value)
         }
-      },
+      }
 
-      eaddress:{
-        get(){
-          return this.$store.state.employee.eaddress
-        },
-        set(value){
-          this.$store.commit("employee/storeEmpAddress", value)
-        }
-      },
-
-      hireddate:{
-        get(){
-          return this.$store.state.employee.hireddate
-        },
-        set(value){
-          this.$store.commit("employee/storeHiredDate", value)
-        }
-      },
-
-      salary:{
-        get(){
-          return this.$store.state.employee.salary
-        },
-        set(value){
-          this.$store.commit("employee/storeSalary", value)
-        }
-      },
-      role:{
-        get(){
-          return this.$store.state.employee.role
-        },
-        set(value){
-          this.$store.commit("employee/storeRole", value)
-        }
-      },
-      noofleaves:{
-        get(){
-          return this.$store.state.employee.noofleaves
-        },
-        set(value){
-          this.$store.commit("employee/storeNoofLeaves", value)
-        }
-      },
-      emppass:{
-        get(){
-          return this.$store.state.employee.emppass
-        },
-        set(value){
-          this.$store.commit("employee/storeEmpPass", value)
-        }
-      },
-
-    },
-
-    async fetch(){
-      await this.$store.commit('users/storeData', (await this.$axios.get(`${process.env.SERVER_API}/employee/{empemail},{emppass}`)).data)
     },
 
     methods: {
-      editItem(employee){
-        this.$store.commit("employee/storeEmpId", employee.eid);
-        this.$store.commit("employee/storeEmpFName", employee.efirstname);
-        this.$store.commit("employee/storeEmpLName", employee.elastname);
-        this.$store.commit("employee/storeEmpMail", employee.empemail);
-        this.$store.commit("employee/storeEmpAddress", employee.eaddress);
-        this.$store.commit("employee/storeHiredDate", employee.hireddate);
-        this.$store.commit("employee/storeNoofLeaves", employee.noofleaves);
-        this.$store.commit("employee/storeSalary", employee.salary);
-        this.$store.commit("employee/storeEmpPass", employee.emppass);
-        this.$store.commit("employee/storeRole", employee.role);
+      async login() {
+        try {
+          const response = await this.$axios.post(`${process.env.SERVER_API}/login`, {
+            username: this.username,
+            password: this.password
+          });
+          if (response.status === 200) {
+            // Handle successful login
+            localStorage.setItem('token', response.data.access_token);
+            this.$store.commit("user/storeId", response.data.id);
+            // Redirect to the dashboard or any other page
+            this.$router.push('/orders');
+          } else {
+            // Handle login error
+            console.error(response.data);
+          }
+        } catch (error) {
+          // Handle network error
+          console.error(error);
+        }
       },
 
     },
@@ -207,7 +160,7 @@ a{
     padding: 10px 0;
 }
 .field{
-    width: 40%;
+    width: 250px;
     padding: 15px 20px;
     border-radius: 10px;
     border: 1px solid #D9D9D9;
@@ -216,7 +169,7 @@ a{
     margin: 10px 0;
 }
 .formbtn{
-    padding: 12px 125px;
+    padding: 12px 80px;
     border-radius: 10px;
     border: 1px solid #20DC49;
     background-color: #F0F2F5;

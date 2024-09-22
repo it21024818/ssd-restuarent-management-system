@@ -6,16 +6,35 @@
         </div>
         <div class="topbar-right">
             <img src="../assets/chithral.png" alt="">
-            <h5>Chithral Somapala</h5>
+            <h5>{{ username }}</h5>
             <i class="uil uil-bell icon"></i>
-            <i class="uil uil-signout icon"></i>
+            <button @click="signOut" class="signout-btn">Sign Out</button>
         </div>
     </div>
 </template>
 
 <script>
 export default {
-  name: 'TopBar'
+  name: 'TopBar',
+
+  computed: {
+    username() {
+      return this.$store.state.user.username;
+    },
+  },
+  methods: {
+    async signOut() {
+        localStorage.removeItem('token');
+        // Send a POST request to the logout endpoint
+        // await this.$axios.post(`${process.env.SERVER_API}/logout`, {}, {
+        //     headers: {
+        //     Authorization: `Bearer ${token}`,
+        //     },
+        // });
+        // Redirect to the login page
+        this.$router.push('/');
+    }
+  }
 }
 </script>
 <style scoped>
@@ -34,6 +53,7 @@ export default {
 
 .topbar-right {
     display: flex;
+    margin-right: 5%;
 }
 
 .topbar-right img{
@@ -60,5 +80,9 @@ export default {
     width:10%;
     margin-top: -20%;
     margin-left: 6%;
+}
+
+.signout-btn {
+  color: red;
 }
 </style>
