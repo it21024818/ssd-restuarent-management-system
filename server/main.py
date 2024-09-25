@@ -13,7 +13,9 @@ import bcrypt
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-
+from google.oauth2 import id_token
+from google.auth.transport import requests
+from sqlalchemy import text
 
 #giving access to the front end server
 app = FastAPI()
@@ -35,11 +37,17 @@ async def add_x_frame_options_header(request, call_next):
 @app.middleware("http")
 async def remove_date_header(request, call_next):
     response = await call_next(request)
-    response.headers.pop("Date", None)
+    del response.headers["Date"]
     return response
-    
+
 JWT_SECRET = os.getenv("JWT_SECRET")
 REFRESH_TOKEN_SECRET = os.getenv("REFRESH_TOKEN_SECRET")
+google_client_id = os.getenv("GOOGLE_CLIENT_ID")
+google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+facebook_client_id = os.getenv("FACEBOOK_CLIENT_ID")
+facebook_client_secret = os.getenv("FACEBOOK_CLIENT_SECRET")
+# Facebook OAuth settings
+facebook_redirect_uri = os.getenv("facebook_redirect_uri")
 
 # In-memory cache to store issued tokens
 token_cache = {}
@@ -140,9 +148,15 @@ async def read_notes():
     return await database.fetch_all(query)
 
 
-@app.post("/customers/", response_model=schemas.Customer)
+@app.post("/customers/")
 async def create_user(customer: schemas.Customer):
-    query = models.customers.insert().values(cusName=customer.cusName,cusEmail=customer.cusEmail,cusNum=customer.cusNum,cusPassword=customer.cusPassword)
+    query = text("INSERT INTO customers (cusName, cusEmail, cusNum, cusPassword) VALUES (:cusName, :cusEmail, :cusNum, :cusPassword)")
+    query = query.bindparams(
+        cusName=customer.cusName,
+        cusEmail=customer.cusEmail,
+        cusNum=customer.cusNum,
+        cusPassword=customer.cusPassword
+    )
     last_record_id = await database.execute(query)
     return {**customer.dict(), "cusId": last_record_id}
 
@@ -154,7 +168,8 @@ async def update_user(customer: schemas.Customer, cusId: int):
 
 @app.delete("/customers/{cusId}")
 async def delete_user(cusId: int):
-    query = models.customers.delete().where(models.customers.c.cusId == cusId)
+    query = text("DELETE FROM customers WHERE cusId = :cusId")
+    query = query.bindparams(cusId=cusId)
     last_record_id = await database.execute(query)
     return {"cusId": last_record_id}
 
@@ -442,3 +457,81 @@ async def delete_user(mItemID: int):
     query = models.menu.delete().where(models.menu.c.mItemID == mItemID)
     last_record_id = await database.execute(query)
     return {"mItemID": last_record_id}
+
+@app.route("/google-auth")
+async def google_auth(request: Request):
+    # Get the authorization code from the request
+    code = request.query_params.get("code")
+
+    # Exchange the authorization code for an access token
+    token_url = "https://accounts.google.com/o/oauth2/token"
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    data = {
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": "http://localhost:3000/google-auth",
+        "client_id": google_client_id,
+        "client_secret": google_client_secret,
+    }
+    response = requests.post(token_url, headers=headers, data=data)
+
+    # Get the access token from the response
+    access_token = response.json().get("access_token")
+
+    # Use the access token to get the user's profile information
+    user_info_url = "https://www.googleapis.com/userinfo/v2/me"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.get(user_info_url, headers=headers)
+
+    # Get the user's profile information from the response
+    user_info = response.json()
+
+    # Create a JWT token for the user
+    user_id = user_info.get("id")
+    user_name = user_info.get("name")
+    user_email = user_info.get("email")
+    user_picture = user_info.get("picture")
+
+    # Store the user's information in the token cache
+    token_cache[user_id] = {
+        "user_id": user_id,
+        "user_name": user_name,
+        "user_email": user_email,
+        "user_picture": user_picture,
+    }
+
+    # Return a JWT token for the user
+    return {"access_token": create_access_token(user_id)}
+
+
+# Define a route for Facebook OAuth
+@app.route('/facebook-auth', methods=['GET', 'POST'])
+async def facebook_auth(request: Request):
+    if request.method == 'GET':
+        code = request.args.get('code')
+        if code:
+            # Exchange the authorization code for an access token
+            token_url = 'https://graph.facebook.com/v2.12/oauth/access_token'
+            headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+            data = {
+                'client_id': facebook_client_id,
+                'redirect_uri': facebook_redirect_uri,
+                'client_secret': facebook_client_secret,
+                'code': code
+            }
+            response = requests.post(token_url, headers=headers, data=data)
+            access_token = response.json().get('access_token')
+            # Use the access token to get the user's profile information
+            user_info_url = 'https://graph.facebook.com/v2.12/me'
+            headers = {'Authorization': f'Bearer {access_token}'}
+            response = requests.get(user_info_url, headers=headers)
+            user_info = response.json()
+            username = user_info.get('name')
+            # Store the username in the user store
+            user_store[username] = {'username': username}
+            # Redirect the user to the /orders page
+            return redirect('/orders')
+    elif request.method == 'POST':
+        # Handle the POST request as before
+        code = request.form.get('code')
+        # ...

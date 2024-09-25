@@ -2,6 +2,12 @@ from datetime import datetime
 from pydantic import BaseModel
 from datetime import date
 
+class FacebookUser(BaseModel):
+    id: str
+    name: str
+    email: str
+    picture: str
+
 class UserCreate(BaseModel):
     username: str
     password: str

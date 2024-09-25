@@ -19,3 +19,21 @@ export const mutations = {
         state.email = data
     },
 }
+
+export const actions = {
+  facebookAuth({ commit }, code) {
+    return new Promise((resolve, reject) => {
+      axios.post('/facebook-auth', { code })
+        .then(response => {
+          const token = response.data.token;
+          const username = response.data.username;
+          commit('setAuthenticated', true);
+          commit('setUsername', username);
+          resolve();
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
+  },
+};

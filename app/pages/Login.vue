@@ -16,7 +16,12 @@
                     <h1>Welcome Back</h1>
                     <h5 id="subtitle">Login into your account</h5>
                 </div>
-                <SocialButtons class="formstyle"/>
+                  <!-- <button type="button" @click.prevent="googleAuth">
+                    <SocialButtons class="formstyle"/>
+                  </button> -->
+                  <button type="button" @click.prevent="facebookAuth">
+                    <SocialButtons class="formstyle" />
+                  </button>
                 <div class="formdiv">
                   <input type="text" v-model="username" placeholder="Username" class="field" id="field" 
                         :class="{ 'error': !isValidUsername }" @blur="validateUsername">
@@ -41,6 +46,8 @@
 <script>
 import LogoPic from '../components/Logo.vue'
 import SocialButtons from '../components/socialMediaBtn.vue'
+import { googleAuth } from 'vue-google-auth';
+import Vue from 'vue'
 
 export default {
   name: 'LoginView',
@@ -136,6 +143,55 @@ export default {
         this.loginError = 'Network error. Please try again.'
       }
     },
+    async googleAuth() {
+      try {
+        const response = await Vue.googleAuth.signIn()({
+          client_id: process.env.GOOGLE_CLIENT_ID,
+          redirect_uri: 'http://localhost:3000/google-auth',
+          scope: 'profile email',
+        });
+        const token = response.credential;
+        // Use the token to authenticate with your backend
+        const backendResponse = await fetch('/google-auth', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `code=${token}`,
+        });
+        const backendData = await backendResponse.json();
+        // Use the backend data to authenticate the user
+        console.log(backendData);
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    facebookAuth() {
+      const clientId = process.env.FACEBOOK_CLIENT_ID;
+      const redirectUri = process.env.FACEBOOK_REDIRECT_URI;
+      const scope = 'email,public_profile';
+      const url = `https://www.facebook.com/v2.12/dialog/oauth?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code`;
+      this.$store.commit('setAuthenticated', true)
+      window.location.href = url;
+      window.addEventListener('load', async () => {
+        try {
+          // Manually redirect to /orders if the previous redirect is not successful
+          await this.$router.push('/orders');
+        } catch (error) {
+          // Handle the error if needed
+          console.error(error);
+        }
+      });
+    },
+    handleFacebookAuth() {
+      const code = this.$route.query.code;
+      if (code) {
+        this.$store.dispatch('facebookAuth', code);
+      }
+    }
+  },
+  mounted() {
+    this.handleFacebookAuth();
   },
 }
 </script>
