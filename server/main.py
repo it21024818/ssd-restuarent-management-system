@@ -49,6 +49,7 @@ facebook_client_id = os.getenv("FACEBOOK_CLIENT_ID")
 facebook_client_secret = os.getenv("FACEBOOK_CLIENT_SECRET")
 # Facebook OAuth settings
 facebook_redirect_uri = os.getenv("facebook_redirect_uri")
+redirect_uri = os.getenv("redirect_uri")
 
 # In-memory cache to store issued tokens
 token_cache = {}
@@ -459,7 +460,7 @@ async def delete_user(mItemID: int):
     last_record_id = await database.execute(query)
     return {"mItemID": last_record_id}
 
-@app.route("/google-auth")
+@app.post("/google-auth")
 async def google_auth(request: Request):
     # Get the authorization code from the request
     code = request.query_params.get("code")
@@ -531,4 +532,4 @@ async def facebook_auth(request: Request):
             # Store the username in the user store
             # user_store[username] = {'username': username}
             # Redirect the user to the /orders page
-            return Response(status_code=status.HTTP_302_FOUND, headers={"Location": "http://localhost:3000/orders"})
+            return Response(status_code=status.HTTP_302_FOUND, headers={"Location": redirect_uri})

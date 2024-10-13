@@ -1,21 +1,21 @@
 <template>
     <div class="mainContainer">
-        <!-- <div class="googleButton">
+        <div class="googleButton">
             <button class="google">
                 <img src="../assets/google.png" alt="" class="googleImg img"><span class="text">Google</span>
             </button>
-        </div> -->
-        <div class="facebookButton">
+        </div>
+        <!-- <div class="facebookButton">
             <button class="facebook">
                 <img src="../assets/facebook.png" alt="" class="facebookImg img"><span class="text">Facebook</span>
             </button>
-        </div>
+        </div> -->
     </div>
 </template>
 
 <script>
 export default {
-  name: 'SocialButtons'
+  name: 'GoogleBtn'
 }
 </script>
 
