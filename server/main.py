@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from models import models
@@ -14,7 +14,8 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from google.oauth2 import id_token
-from google.auth.transport import requests
+# from google.auth.transport import requests
+import requests
 from sqlalchemy import text
 
 #giving access to the front end server
@@ -505,10 +506,10 @@ async def google_auth(request: Request):
 
 
 # Define a route for Facebook OAuth
-@app.route('/facebook-auth', methods=['GET', 'POST'])
+@app.get('/facebook-auth')
 async def facebook_auth(request: Request):
     if request.method == 'GET':
-        code = request.args.get('code')
+        code = request.query_params.get('code')
         if code:
             # Exchange the authorization code for an access token
             token_url = 'https://graph.facebook.com/v2.12/oauth/access_token'
@@ -528,10 +529,6 @@ async def facebook_auth(request: Request):
             user_info = response.json()
             username = user_info.get('name')
             # Store the username in the user store
-            user_store[username] = {'username': username}
+            # user_store[username] = {'username': username}
             # Redirect the user to the /orders page
-            return redirect('/orders')
-    elif request.method == 'POST':
-        # Handle the POST request as before
-        code = request.form.get('code')
-        # ...
+            return Response(status_code=status.HTTP_302_FOUND, headers={"Location": "http://localhost:3000/orders"})
