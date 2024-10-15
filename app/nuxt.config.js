@@ -34,13 +34,20 @@ export default {
       { name: "format-detection", content: "telephone=no" },
     ],
     link: [{ rel: "icon", type: "image/x-icon", href: "/logo.jpg" }],
+    script: [
+      {
+        src: 'https://accounts.google.com/gsi/client',
+        async: true,
+        defer: true,
+      },
+    ],
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: ["@sweetalert2/theme-material-ui", "~/assets/main.css"],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: ["~/plugins/cart.js"],
+  // plugins: ["~/plugins/googleAuth.js"],
 
   webfontloader: {
     google: {

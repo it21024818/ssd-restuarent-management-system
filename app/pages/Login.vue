@@ -16,15 +16,13 @@
                     <h1>Welcome Back</h1>
                     <h5 id="subtitle">Login into your account</h5>
                 </div>
-                  <!-- <button type="button" @click.prevent="googleAuth">
-                    <SocialButtons class="formstyle"/>
-                  </button> -->
                   <button type="button" @click.prevent="facebookAuth">
                     <SocialButtons class="formstyle" />
                   </button>
-                  <button type="button" @click.prevent="googleSignIn">
-                    <GoogleBtn class="formstyle" />
+                  <button class="gbtn" type="button">
+                    <GoogleSignIn />
                   </button>
+                
                 <div class="formdiv">
                   <input type="text" v-model="username" placeholder="Username" class="field" id="field" 
                         :class="{ 'error': !isValidUsername }" @blur="validateUsername">
@@ -49,12 +47,12 @@
 <script>
 import LogoPic from '../components/Logo.vue'
 import SocialButtons from '../components/socialMediaBtn.vue'
-import Vue from 'vue'
+import GoogleSignIn from '../components/GoogleSignIn.vue'
 
 export default {
   name: 'LoginView',
   components: {
-    LogoPic, SocialButtons
+    LogoPic, SocialButtons, GoogleSignIn
   },
 
   data() {
@@ -63,7 +61,7 @@ export default {
       password: '',
       isValidUsername: true,
       isValidPassword: true,
-      loginError: null
+      loginError: null,
     }
   },
 
@@ -143,48 +141,6 @@ export default {
         // Handle network error
         console.error(error);
         this.loginError = 'Network error. Please try again.'
-      }
-    },
-    // async googleAuth() {
-    //   try {
-    //     const response = await Vue.googleAuth.signIn()({
-    //       client_id: process.env.GOOGLE_CLIENT_ID,
-    //       redirect_uri: 'http://localhost:3000/google-auth',
-    //       scope: 'profile email',
-    //     });
-    //     const token = response.credential;
-    //     // Use the token to authenticate with your backend
-    //     const backendResponse = await fetch('/google-auth', {
-    //       method: 'POST',
-    //       headers: {
-    //         'Content-Type': 'application/x-www-form-urlencoded',
-    //       },
-    //       body: `code=${token}`,
-    //     });
-    //     const backendData = await backendResponse.json();
-    //     // Use the backend data to authenticate the user
-    //     console.log(backendData);
-    //   } catch (error) {
-    //     console.error(error);
-    //   }
-    // },
-    async googleSignIn() {
-      try {
-        const response = await googleSignin.signIn();
-        const token = response.credential;
-        // Use the token to authenticate with your backend
-        const backendResponse = await fetch('/google-auth', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: `code=${token}`,
-        });
-        const backendData = await backendResponse.json();
-        // Use the backend data to authenticate the user
-        console.log(backendData);
-      } catch (error) {
-        console.error(error);
       }
     },
 
